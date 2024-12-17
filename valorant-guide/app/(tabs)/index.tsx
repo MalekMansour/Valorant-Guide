@@ -3,16 +3,25 @@ import { Image, StyleSheet, FlatList, ActivityIndicator, View } from 'react-nati
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
+interface Agent {
+  uuid: string;
+  displayName: string;
+  description: string;
+  displayIcon: string;
+  role?: {
+    displayName: string;
+  };
+}
+
 export default function ValorantGuideScreen() {
-  const [agents, setAgents] = useState([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch data from the Valorant API
-    fetch('https://valorant-api.com/v1/agents') // Example endpoint for agents
+    fetch('https://valorant-api.com/v1/agents')
       .then((response) => response.json())
-      .then((data) => {
-        setAgents(data.data); // Adjust based on API response structure
+      .then((data: { data: Agent[] }) => {
+        setAgents(data.data); // Type-safe assignment
         setLoading(false);
       })
       .catch((error) => {
@@ -31,19 +40,19 @@ export default function ValorantGuideScreen() {
   }
 
   return (
-    <FlatList<Agent> // Specify the data type for the FlatList
-  data={agents}
-  keyExtractor={(item) => item.uuid} // 'item' is of type Agent
-  contentContainerStyle={styles.listContainer}
-  renderItem={({ item }: { item: Agent }) => ( // Explicitly type the item
-    <ThemedView style={styles.agentCard}>
-      <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
-      <ThemedText type="title">{item.displayName}</ThemedText>
-      <ThemedText>{item.role?.displayName || 'No Role'}</ThemedText>
-      <ThemedText>{item.description || 'No Description'}</ThemedText>
-    </ThemedView>
-  )}
-/>
+    <FlatList<Agent>
+      data={agents}
+      keyExtractor={(item) => item.uuid}
+      contentContainerStyle={styles.listContainer}
+      renderItem={({ item }: { item: Agent }) => (
+        <ThemedView style={styles.agentCard}>
+          <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
+          <ThemedText type="title">{item.displayName}</ThemedText>
+          <ThemedText>{item.role?.displayName || 'No Role'}</ThemedText>
+          <ThemedText>{item.description || 'No Description'}</ThemedText>
+        </ThemedView>
+      )}
+    />
   );
 }
 
