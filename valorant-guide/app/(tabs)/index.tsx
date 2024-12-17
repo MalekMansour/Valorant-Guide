@@ -1,81 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, FlatList, ActivityIndicator, View } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-interface Agent {
-  uuid: string;
-  displayName: string;
-  description: string;
-  displayIcon: string;
-  role?: {
-    displayName: string;
-  };
-}
-
-export default function ValorantGuideScreen() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('https://valorant-api.com/v1/agents')
-      .then((response) => response.json())
-      .then((data: { data: Agent[] }) => {
-        setAgents(data.data); // Type-safe assignment
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching Valorant data:', error);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
-    return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-        <ThemedText>Loading Agents...</ThemedText>
-      </ThemedView>
-    );
-  }
+export default function HomeScreen() {
+  const router = useRouter();
 
   return (
-    <FlatList<Agent>
-      data={agents}
-      keyExtractor={(item) => item.uuid}
-      contentContainerStyle={styles.listContainer}
-      renderItem={({ item }: { item: Agent }) => (
-        <ThemedView style={styles.agentCard}>
-          <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
-          <ThemedText type="title">{item.displayName}</ThemedText>
-          <ThemedText>{item.role?.displayName || 'No Role'}</ThemedText>
-          <ThemedText>{item.description || 'No Description'}</ThemedText>
-        </ThemedView>
-      )}
-    />
+    <ThemedView style={styles.container}>
+      <ThemedText type="title">Valorant Guide</ThemedText>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/tabs/agents')}>
+        <ThemedText type="buttonText">Agents</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/tabs/maps')}>
+        <ThemedText type="buttonText">Maps</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/tabs/guns')}>
+        <ThemedText type="buttonText">Guns</ThemedText>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/tabs/ranks')}>
+        <ThemedText type="buttonText">Ranks</ThemedText>
+      </TouchableOpacity>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  listContainer: {
-    padding: 16,
-  },
-  loadingContainer: {
+  container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 16,
   },
-  agentCard: {
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 8,
+  button: {
     backgroundColor: '#1D3D47',
-    alignItems: 'center',
-  },
-  agentImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
   },
 });
