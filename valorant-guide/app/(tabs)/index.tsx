@@ -31,19 +31,19 @@ export default function ValorantGuideScreen() {
   }
 
   return (
-    <FlatList
-      data={agents}
-      keyExtractor={(item) => item.uuid}
-      contentContainerStyle={styles.listContainer}
-      renderItem={({ item }) => (
-        <ThemedView style={styles.agentCard}>
-          <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
-          <ThemedText type="title">{item.displayName}</ThemedText>
-          <ThemedText>{item.role?.displayName || 'No Role'}</ThemedText>
-          <ThemedText>{item.description || 'No Description'}</ThemedText>
-        </ThemedView>
-      )}
-    />
+    <FlatList<Agent> // Specify the data type for the FlatList
+  data={agents}
+  keyExtractor={(item) => item.uuid} // 'item' is of type Agent
+  contentContainerStyle={styles.listContainer}
+  renderItem={({ item }: { item: Agent }) => ( // Explicitly type the item
+    <ThemedView style={styles.agentCard}>
+      <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
+      <ThemedText type="title">{item.displayName}</ThemedText>
+      <ThemedText>{item.role?.displayName || 'No Role'}</ThemedText>
+      <ThemedText>{item.description || 'No Description'}</ThemedText>
+    </ThemedView>
+  )}
+/>
   );
 }
 
