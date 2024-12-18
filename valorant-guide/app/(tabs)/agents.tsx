@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, View } from 'react-native';
+import { FlatList, Image, StyleSheet, View, Dimensions } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 // Define the type for an agent
 interface Agent {
@@ -14,7 +15,7 @@ interface Agent {
 }
 
 export default function AgentsScreen() {
-  const [agents, setAgents] = useState<Agent[]>([]); 
+  const [agents, setAgents] = useState<Agent[]>([]);
 
   useEffect(() => {
     // Fetch Agents data from Valorant API
@@ -24,17 +25,27 @@ export default function AgentsScreen() {
       .catch((err) => console.error(err));
   }, []);
 
+  // Get the device width for responsive layout
+  const numColumns = 5;
+  const screenWidth = Dimensions.get('window').width;
+  const cardSize = screenWidth / numColumns - 16; // Calculate size for each card
+
   return (
     <FlatList
       data={agents}
       keyExtractor={(item) => item.uuid}
+      numColumns={numColumns} // Set number of columns
       contentContainerStyle={styles.listContainer}
       renderItem={({ item }) => (
-        <ThemedView style={styles.agentCard}>
+        <Animated.View
+          entering={FadeIn.duration(500)} // Add fade-in animation
+          style={[styles.agentCard, { width: cardSize, height: cardSize }]}
+        >
           <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
-          <ThemedText type="title">{item.displayName}</ThemedText>
-          <ThemedText>{item.role?.displayName || 'No Role'}</ThemedText>
-        </ThemedView>
+          <ThemedText type="defaultSemiBold" style={styles.agentName}>
+            {item.displayName}
+          </ThemedText>
+        </Animated.View>
       )}
     />
   );
@@ -42,19 +53,30 @@ export default function AgentsScreen() {
 
 const styles = StyleSheet.create({
   listContainer: {
-    padding: 16,
+    padding: 8,
+    backgroundColor: '#0F1923', // Valorant black theme
   },
   agentCard: {
-    padding: 16,
-    marginBottom: 16,
+    margin: 8,
     borderRadius: 8,
-    backgroundColor: '#1D3D47',
+    backgroundColor: '#FF4655', // Valorant red theme
+    justifyContent: 'center',
     alignItems: 'center',
+    elevation: 5, // Add shadow for depth on Android
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   agentImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: '80%',
+    height: '50%',
+    resizeMode: 'contain',
     marginBottom: 8,
+  },
+  agentName: {
+    color: '#FFFFFF', // White text color
+    textAlign: 'center',
+    fontSize: 12,
   },
 });
