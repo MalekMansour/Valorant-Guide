@@ -14,13 +14,13 @@ interface Agent {
 }
 
 export default function AgentsScreen() {
-  const [agents, setAgents] = useState<Agent[]>([]); // Use the Agent type for the state
+  const [agents, setAgents] = useState<Agent[]>([]); 
 
   useEffect(() => {
     // Fetch Agents data from Valorant API
     fetch('https://valorant-api.com/v1/agents')
       .then((res) => res.json())
-      .then((data) => setAgents(data.data)) // Assuming data.data contains the agent array
+      .then((data) => setAgents(data.data))
       .catch((err) => console.error(err));
   }, []);
 
