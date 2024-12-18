@@ -5,3 +5,4 @@
 
  - Check All Agents
 - Check All Maps
+- Check All Guns
