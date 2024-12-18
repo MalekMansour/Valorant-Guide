@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   agentName: {
-    color: '#FFFFFF', // White text color
+    color: '#FFFFFF', 
     textAlign: 'center',
     fontSize: 12,
   },
