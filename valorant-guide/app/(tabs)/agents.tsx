@@ -34,11 +34,11 @@ export default function AgentsScreen() {
     <FlatList
       data={agents}
       keyExtractor={(item) => item.uuid}
-      numColumns={numColumns} // Set number of columns
+      numColumns={numColumns} 
       contentContainerStyle={styles.listContainer}
       renderItem={({ item }) => (
         <Animated.View
-          entering={FadeIn.duration(500)} // Add fade-in animation
+          entering={FadeIn.duration(500)} 
           style={[styles.agentCard, { width: cardSize, height: cardSize }]}
         >
           <Image source={{ uri: item.displayIcon }} style={styles.agentImage} />
@@ -62,8 +62,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF4655', // Valorant red theme
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5, // Add shadow for depth on Android
-    shadowColor: '#000', // Shadow for iOS
+    elevation: 5, 
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
