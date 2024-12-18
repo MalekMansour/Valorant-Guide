@@ -6,3 +6,4 @@
  - Check All Agents
 - Check All Maps
 - Check All Guns
+- Check All Ranks
