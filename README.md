@@ -4,3 +4,4 @@
  ## Features
 
  - Check All Agents
+- Check All Maps
