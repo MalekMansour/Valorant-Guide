@@ -25,7 +25,6 @@ export default function AgentsScreen() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Get the device width for responsive layout
   const numColumns = 5;
   const screenWidth = Dimensions.get('window').width;
   const cardSize = screenWidth / numColumns - 16; 
