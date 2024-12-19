@@ -11,13 +11,13 @@ interface Map {
 }
 
 export default function MapsScreen() {
-  const [maps, setMaps] = useState<Map[]>([]); // Use the Map type for the state
+  const [maps, setMaps] = useState<Map[]>([]); 
 
   useEffect(() => {
     // Fetch maps from the Valorant API
     fetch('https://valorant-api.com/v1/maps')
       .then((response) => response.json())
-      .then((data) => setMaps(data.data)) // Assuming data.data contains the map array
+      .then((data) => setMaps(data.data))
       .catch((error) => console.error('Error fetching maps:', error));
   }, []);
 
