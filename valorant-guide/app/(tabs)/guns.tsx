@@ -6,16 +6,27 @@ type Weapon = {
   category: string;
   shopData: {
     cost: number;
+    categoryText: string;
+    gridPosition: { row: number; column: number };
+    canBeTrashed: boolean;
+    image: string;
+    newImage: string;
+    newImage2: string;
   } | null;
-  fireRate: number | null;
-  magazineSize: number | null;
-  reloadTimeSeconds: number | null;
   weaponStats: {
     fireRate: number;
     magazineSize: number;
     reloadTimeSeconds: number;
+    damageRanges: Array<{
+      rangeStartMeters: number;
+      rangeEndMeters: number;
+      headDamage: number;
+      bodyDamage: number;
+      legDamage: number;
+    }>;
   } | null;
   displayIcon: string;
+  killStreamIcon: string;
 };
 
 const GunPage: React.FC = () => {
@@ -77,6 +88,31 @@ const GunPage: React.FC = () => {
           <p>
             <strong>Reload Time:</strong> {selectedWeapon.weaponStats?.reloadTimeSeconds || "N/A"} seconds
           </p>
+          <p>
+            <strong>Damage (by Range):</strong>
+          </p>
+          <ul>
+            {selectedWeapon.weaponStats?.damageRanges.map((range, index) => (
+              <li key={index}>
+                <p>
+                  Range: {range.rangeStartMeters}m - {range.rangeEndMeters}m
+                </p>
+                <p>Head Damage: {range.headDamage}</p>
+                <p>Body Damage: {range.bodyDamage}</p>
+                <p>Leg Damage: {range.legDamage}</p>
+              </li>
+            ))}
+          </ul>
+          {selectedWeapon.shopData?.categoryText && (
+            <p>
+              <strong>Shop Info:</strong> {selectedWeapon.shopData.categoryText}
+            </p>
+          )}
+          {selectedWeapon.shopData?.canBeTrashed !== undefined && (
+            <p>
+              <strong>Can Be Trashed:</strong> {selectedWeapon.shopData.canBeTrashed ? "Yes" : "No"}
+            </p>
+          )}
         </div>
       )}
     </div>
