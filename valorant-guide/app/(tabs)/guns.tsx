@@ -1,89 +1,139 @@
-import React, { useState } from "react";
-import "./gun.css"; // Make sure to create a matching CSS file for styling
+import React, { useEffect, useState } from "react";
 
 type Weapon = {
-  name: string;
-  cost: number | string;
-  type: string;
-  description: string;
-  image: string; // Add image paths for each gun
+  uuid: string;
+  displayName: string;
+  category: string;
+  shopData: {
+    cost: number;
+  } | null;
+  fireRate: number | null;
+  magazineSize: number | null;
+  reloadTimeSeconds: number | null;
+  weaponStats: {
+    fireRate: number;
+    magazineSize: number;
+    reloadTimeSeconds: number;
+  } | null;
+  displayIcon: string;
 };
 
-const weapons: Weapon[] = [
-  // Sidearms
-  { name: "Classic", cost: "Free", type: "Sidearm", description: "Burst fire sidearm.", image: "path_to_image" },
-  { name: "Shorty", cost: 200, type: "Sidearm", description: "Close-range sidearm.", image: "path_to_image" },
-  { name: "Frenzy", cost: 500, type: "Sidearm", description: "Rapid-fire sidearm.", image: "path_to_image" },
-  { name: "Ghost", cost: 500, type: "Sidearm", description: "Silenced sidearm.", image: "path_to_image" },
-  { name: "Sheriff", cost: 800, type: "Sidearm", description: "High-damage revolver.", image: "path_to_image" },
-
-  // SMGs
-  { name: "Stinger", cost: 1000, type: "SMG", description: "Fast fire SMG.", image: "path_to_image" },
-  { name: "Spectre", cost: 1600, type: "SMG", description: "Silenced SMG.", image: "path_to_image" },
-
-  // Rifles
-  { name: "Bulldog", cost: 2100, type: "Rifle", description: "Burst-fire rifle.", image: "path_to_image" },
-  { name: "Guardian", cost: 2700, type: "Rifle", description: "Semi-auto rifle.", image: "path_to_image" },
-  { name: "Phantom", cost: 2900, type: "Rifle", description: "Silenced auto rifle.", image: "path_to_image" },
-  { name: "Vandal", cost: 2900, type: "Rifle", description: "High-damage auto rifle.", image: "path_to_image" },
-
-  // Snipers
-  { name: "Marshal", cost: 1100, type: "Sniper", description: "Light sniper rifle.", image: "path_to_image" },
-  { name: "Operator", cost: 4500, type: "Sniper", description: "High-damage sniper.", image: "path_to_image" },
-
-  // Shotguns
-  { name: "Bucky", cost: 900, type: "Shotgun", description: "Pump-action shotgun.", image: "path_to_image" },
-  { name: "Judge", cost: 1850, type: "Shotgun", description: "Automatic shotgun.", image: "path_to_image" },
-
-  // Heavy
-  { name: "Ares", cost: 1700, type: "Heavy", description: "Light machine gun.", image: "path_to_image" },
-  { name: "Odin", cost: 3200, type: "Heavy", description: "Heavy machine gun.", image: "path_to_image" },
-];
-
-const GunMenu: React.FC = () => {
+const GunPage: React.FC = () => {
+  const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
 
-  const handleWeaponClick = (weapon: Weapon) => {
-    setSelectedWeapon(weapon);
-  };
+  // Fetch weapons from the Valorant API
+  useEffect(() => {
+    const fetchWeapons = async () => {
+      try {
+        const response = await fetch("https://valorant-api.com/v1/weapons");
+        const data = await response.json();
+        setWeapons(data.data || []);
+      } catch (error) {
+        console.error("Error fetching weapons:", error);
+      }
+    };
 
-  const renderCategory = (type: string) => {
-    return (
-      <div className="category">
-        <h2>{type}</h2>
-        <div className="weapon-grid">
-          {weapons
-            .filter((weapon) => weapon.type === type)
-            .map((weapon) => (
-              <div
-                key={weapon.name}
-                className={`weapon ${selectedWeapon?.name === weapon.name ? "selected" : ""}`}
-                onClick={() => handleWeaponClick(weapon)}
-              >
-                <img src={weapon.image} alt={weapon.name} className="weapon-image" />
-                <p className="weapon-name">{weapon.name}</p>
-                <p className="weapon-cost">{weapon.cost === "Free" ? "Free" : `₭${weapon.cost}`}</p>
-              </div>
-            ))}
-        </div>
-      </div>
-    );
-  };
+    fetchWeapons();
+  }, []);
 
   return (
-    <div className="gun-menu">
-      <div className="categories">
-        {["Sidearm", "SMG", "Rifle", "Sniper", "Shotgun", "Heavy"].map((type) => renderCategory(type))}
+    <div style={styles.container}>
+      <h1 style={styles.title}>Valorant Weapons</h1>
+      <div style={styles.weaponGrid}>
+        {weapons.map((weapon) => (
+          <div
+            key={weapon.uuid}
+            onClick={() => setSelectedWeapon(weapon)}
+            style={{
+              ...styles.weaponCard,
+              border: selectedWeapon?.uuid === weapon.uuid ? "2px solid #ff4655" : "1px solid #333",
+            }}
+          >
+            <img src={weapon.displayIcon} alt={weapon.displayName} style={styles.weaponIcon} />
+            <h3>{weapon.displayName}</h3>
+            <p>Cost: {weapon.shopData?.cost || "Free"}</p>
+            <p>Category: {weapon.category.split("::")[1]}</p>
+          </div>
+        ))}
       </div>
+
       {selectedWeapon && (
-        <div className="weapon-details">
-          <h2>{selectedWeapon.name}</h2>
-          <p>{selectedWeapon.description}</p>
-          <p>Cost: {selectedWeapon.cost === "Free" ? "Free" : `₭${selectedWeapon.cost}`}</p>
+        <div style={styles.weaponDetails}>
+          <h2>{selectedWeapon.displayName}</h2>
+          <img src={selectedWeapon.displayIcon} alt={selectedWeapon.displayName} style={styles.detailIcon} />
+          <p>
+            <strong>Cost:</strong> {selectedWeapon.shopData?.cost || "Free"}
+          </p>
+          <p>
+            <strong>Category:</strong> {selectedWeapon.category.split("::")[1]}
+          </p>
+          <p>
+            <strong>Fire Rate:</strong> {selectedWeapon.weaponStats?.fireRate || "N/A"} rounds/sec
+          </p>
+          <p>
+            <strong>Magazine Size:</strong> {selectedWeapon.weaponStats?.magazineSize || "N/A"} bullets
+          </p>
+          <p>
+            <strong>Reload Time:</strong> {selectedWeapon.weaponStats?.reloadTimeSeconds || "N/A"} seconds
+          </p>
         </div>
       )}
     </div>
   );
 };
 
-export default GunMenu;
+// Inline styles for simplicity
+const styles = {
+  container: {
+    padding: "20px",
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#0f1923",
+    color: "#fff",
+    minHeight: "100vh",
+  },
+  title: {
+    textAlign: "center",
+    fontSize: "2.5rem",
+    marginBottom: "20px",
+  },
+  weaponGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "20px",
+  },
+  weaponCard: {
+    backgroundColor: "#1c2533",
+    borderRadius: "8px",
+    padding: "15px",
+    textAlign: "center",
+    cursor: "pointer",
+    transition: "transform 0.2s, box-shadow 0.2s",
+  },
+  weaponCardHover: {
+    transform: "scale(1.05)",
+    boxShadow: "0 4px 15px rgba(255, 70, 85, 0.5)",
+  },
+  weaponIcon: {
+    maxWidth: "100%",
+    height: "100px",
+    objectFit: "contain",
+    marginBottom: "10px",
+  },
+  weaponDetails: {
+    marginTop: "40px",
+    padding: "20px",
+    backgroundColor: "#1c2533",
+    borderRadius: "8px",
+    boxShadow: "0 4px 15px rgba(255, 70, 85, 0.5)",
+  },
+  detailIcon: {
+    maxWidth: "100%",
+    height: "150px",
+    objectFit: "contain",
+    display: "block",
+    margin: "0 auto 20px",
+  },
+};
+
+export default GunPage;
