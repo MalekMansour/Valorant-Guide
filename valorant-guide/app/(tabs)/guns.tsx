@@ -1,175 +1,213 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  View,
+  Dimensions,
+  Modal,
+  Pressable,
+  ScrollView,
+} from 'react-native';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
-type Weapon = {
+// Define the type for a gun
+interface Gun {
   uuid: string;
   displayName: string;
+  displayIcon: string;
   category: string;
-  shopData: {
-    cost: number;
-    categoryText: string;
-    gridPosition: { row: number; column: number };
-    canBeTrashed: boolean;
-    image: string;
-    newImage: string;
-    newImage2: string;
-  } | null;
   weaponStats: {
     fireRate: number;
     magazineSize: number;
     reloadTimeSeconds: number;
-    damageRanges: Array<{
-      rangeStartMeters: number;
-      rangeEndMeters: number;
-      headDamage: number;
-      bodyDamage: number;
-      legDamage: number;
-    }>;
   } | null;
-  displayIcon: string;
-  killStreamIcon: string;
-};
+}
 
-const GunPage: React.FC = () => {
-  const [weapons, setWeapons] = useState<Weapon[]>([]);
-  const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
+export default function GunsScreen() {
+  const [guns, setGuns] = useState<Gun[]>([]);
+  const [selectedGun, setSelectedGun] = useState<Gun | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Fetch weapons from the Valorant API
   useEffect(() => {
-    const fetchWeapons = async () => {
-      try {
-        const response = await fetch("https://valorant-api.com/v1/weapons");
-        const data = await response.json();
-        setWeapons(data.data || []);
-      } catch (error) {
-        console.error("Error fetching weapons:", error);
-      }
-    };
-
-    fetchWeapons();
+    // Fetch Guns data from Valorant API
+    fetch('https://valorant-api.com/v1/weapons')
+      .then((res) => res.json())
+      .then((data) => setGuns(data.data))
+      .catch((err) => console.error(err));
   }, []);
 
+  const numColumns = 2;
+  const screenWidth = Dimensions.get('window').width;
+  const cardWidth = screenWidth / numColumns - 16;
+
+  const handleGunPress = (gun: Gun) => {
+    setSelectedGun(gun);
+    setIsModalVisible(true);
+  };
+
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Valorant Weapons</h1>
-      <div style={styles.weaponGrid}>
-        {weapons.map((weapon) => (
-          <div
-            key={weapon.uuid}
-            onClick={() => setSelectedWeapon(weapon)}
-            style={{
-              ...styles.weaponCard,
-              border: selectedWeapon?.uuid === weapon.uuid ? "2px solid #ff4655" : "1px solid #333",
-            }}
-          >
-            <img src={weapon.displayIcon} alt={weapon.displayName} style={styles.weaponIcon} />
-            <h3>{weapon.displayName}</h3>
-            <p>Cost: {weapon.shopData?.cost || "Free"}</p>
-            <p>Category: {weapon.category.split("::")[1]}</p>
-          </div>
-        ))}
-      </div>
+    <>
+      <FlatList
+        data={guns}
+        keyExtractor={(item) => item.uuid}
+        numColumns={numColumns}
+        contentContainerStyle={styles.listContainer}
+        renderItem={({ item }) => (
+          <Pressable onPress={() => handleGunPress(item)}>
+            <Animated.View
+              entering={FadeIn.duration(500)}
+              style={[styles.gunCard, { width: cardWidth }]}
+            >
+              <Image
+                source={{ uri: item.displayIcon }}
+                style={styles.gunImage}
+              />
+              <ThemedText type="defaultSemiBold" style={styles.gunName}>
+                {item.displayName}
+              </ThemedText>
+            </Animated.View>
+          </Pressable>
+        )}
+      />
 
-      {selectedWeapon && (
-        <div style={styles.weaponDetails}>
-          <h2>{selectedWeapon.displayName}</h2>
-          <img src={selectedWeapon.displayIcon} alt={selectedWeapon.displayName} style={styles.detailIcon} />
-          <p>
-            <strong>Cost:</strong> {selectedWeapon.shopData?.cost || "Free"}
-          </p>
-          <p>
-            <strong>Category:</strong> {selectedWeapon.category.split("::")[1]}
-          </p>
-          <p>
-            <strong>Fire Rate:</strong> {selectedWeapon.weaponStats?.fireRate || "N/A"} rounds/sec
-          </p>
-          <p>
-            <strong>Magazine Size:</strong> {selectedWeapon.weaponStats?.magazineSize || "N/A"} bullets
-          </p>
-          <p>
-            <strong>Reload Time:</strong> {selectedWeapon.weaponStats?.reloadTimeSeconds || "N/A"} seconds
-          </p>
-          <p>
-            <strong>Damage (by Range):</strong>
-          </p>
-          <ul>
-            {selectedWeapon.weaponStats?.damageRanges.map((range, index) => (
-              <li key={index}>
-                <p>
-                  Range: {range.rangeStartMeters}m - {range.rangeEndMeters}m
-                </p>
-                <p>Head Damage: {range.headDamage}</p>
-                <p>Body Damage: {range.bodyDamage}</p>
-                <p>Leg Damage: {range.legDamage}</p>
-              </li>
-            ))}
-          </ul>
-          {selectedWeapon.shopData?.categoryText && (
-            <p>
-              <strong>Shop Info:</strong> {selectedWeapon.shopData.categoryText}
-            </p>
-          )}
-          {selectedWeapon.shopData?.canBeTrashed !== undefined && (
-            <p>
-              <strong>Can Be Trashed:</strong> {selectedWeapon.shopData.canBeTrashed ? "Yes" : "No"}
-            </p>
-          )}
-        </div>
+      {selectedGun && (
+        <Modal
+          visible={isModalVisible}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setIsModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <ThemedView style={styles.modalContent}>
+              <ScrollView>
+                <Image
+                  source={{ uri: selectedGun.displayIcon }}
+                  style={styles.modalImage}
+                />
+                <ThemedText style={styles.gunNameLarge} type="title">
+                  {selectedGun.displayName}
+                </ThemedText>
+                <ThemedText style={styles.category}>
+                  {selectedGun.category}
+                </ThemedText>
+                {selectedGun.weaponStats && (
+                  <>
+                    <ThemedText style={styles.statsHeader} type="subtitle">
+                      Stats:
+                    </ThemedText>
+                    <View style={styles.stats}>
+                      <ThemedText style={styles.statItem}>
+                        Fire Rate: {selectedGun.weaponStats.fireRate}
+                      </ThemedText>
+                      <ThemedText style={styles.statItem}>
+                        Magazine Size: {selectedGun.weaponStats.magazineSize}
+                      </ThemedText>
+                      <ThemedText style={styles.statItem}>
+                        Reload Time: {selectedGun.weaponStats.reloadTimeSeconds}{' '}
+                        s
+                      </ThemedText>
+                    </View>
+                  </>
+                )}
+              </ScrollView>
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setIsModalVisible(false)}
+              >
+                <ThemedText style={styles.closeButtonText}>Close</ThemedText>
+              </Pressable>
+            </ThemedView>
+          </View>
+        </Modal>
       )}
-    </div>
+    </>
   );
-};
+}
 
-// Inline styles for simplicity
-const styles = {
-  container: {
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#0f1923",
-    color: "#fff",
-    minHeight: "100vh",
+const styles = StyleSheet.create({
+  listContainer: {
+    padding: 8,
+    backgroundColor: '#0F1923',
   },
-  title: {
-    textAlign: "center",
-    fontSize: "2.5rem",
-    marginBottom: "20px",
+  gunCard: {
+    margin: 8,
+    borderRadius: 8,
+    backgroundColor: '#FF4655',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
-  weaponGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
+  gunImage: {
+    width: '90%',
+    height: 150,
+    resizeMode: 'contain',
+    marginBottom: 8,
   },
-  weaponCard: {
-    backgroundColor: "#1c2533",
-    borderRadius: "8px",
-    padding: "15px",
-    textAlign: "center",
-    cursor: "pointer",
-    transition: "transform 0.2s, box-shadow 0.2s",
+  gunName: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: 14,
   },
-  weaponCardHover: {
-    transform: "scale(1.05)",
-    boxShadow: "0 4px 15px rgba(255, 70, 85, 0.5)",
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
-  weaponIcon: {
-    maxWidth: "100%",
-    height: "100px",
-    objectFit: "contain",
-    marginBottom: "10px",
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    borderRadius: 8,
+    padding: 16,
+    backgroundColor: '#0F1923',
   },
-  weaponDetails: {
-    marginTop: "40px",
-    padding: "20px",
-    backgroundColor: "#1c2533",
-    borderRadius: "8px",
-    boxShadow: "0 4px 15px rgba(255, 70, 85, 0.5)",
+  modalImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+    marginBottom: 16,
   },
-  detailIcon: {
-    maxWidth: "100%",
-    height: "150px",
-    objectFit: "contain",
-    display: "block",
-    margin: "0 auto 20px",
+  gunNameLarge: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 8,
   },
-};
-
-export default GunPage;
+  category: {
+    color: '#FF4655',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  statsHeader: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  stats: {
+    marginBottom: 16,
+  },
+  statItem: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  closeButton: {
+    marginTop: 16,
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: '#FF4655',
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+});
