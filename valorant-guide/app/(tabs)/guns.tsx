@@ -13,7 +13,6 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-// Define the type for a gun
 interface Gun {
   uuid: string;
   displayName: string;
