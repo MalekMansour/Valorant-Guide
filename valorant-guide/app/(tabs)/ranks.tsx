@@ -27,12 +27,16 @@ export default function RankScreen() {
         console.log('API Data:', data); // Debugging API response
         const competitiveTiers = data.data[3]; // Adjust for the correct episode
         console.log('Competitive Tiers:', competitiveTiers);
+
         const tiers = competitiveTiers.tiers.filter(
           (tier: any) =>
             tier.tier !== undefined &&
             tier.tierName !== 'Unused' &&
+            tier.tierName !== 'Unused1' && // Exclude Unused1
+            tier.tierName !== 'Unused2' && // Exclude Unused2
             tier.tierName !== ''
         );
+
         console.log('Filtered Tiers:', tiers); // Debug filtered tiers
         setRanks(tiers);
       })
