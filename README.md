@@ -1,5 +1,5 @@
 # Valorant-Guide
- A Valorant Guide that the User can use to see information about Agents, Maps, 
+ A Valorant Guide that the User can use to see information about Agents, Maps, Guns and Ranks.
 
  ## Features
 
