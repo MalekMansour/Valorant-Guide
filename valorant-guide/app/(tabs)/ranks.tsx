@@ -11,24 +11,29 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-// Define the type for a rank
 interface Rank {
-  uuid: string;
-  displayName: string;
-  displayIcon: string;
+  tier: number;
+  tierName: string;
+  largeIcon: string | null;
 }
 
 export default function RankScreen() {
   const [ranks, setRanks] = useState<Rank[]>([]);
 
   useEffect(() => {
-    // Fetch ranks from Valorant API
     fetch('https://valorant-api.com/v1/competitivetiers')
       .then((res) => res.json())
       .then((data) => {
-        const tiers = data.data.filter(
-          (tier: any) => tier.tierName !== 'Unused'
+        console.log('API Data:', data); // Debugging API response
+        const competitiveTiers = data.data[3]; // Adjust for the correct episode
+        console.log('Competitive Tiers:', competitiveTiers);
+        const tiers = competitiveTiers.tiers.filter(
+          (tier: any) =>
+            tier.tier !== undefined &&
+            tier.tierName !== 'Unused' &&
+            tier.tierName !== ''
         );
+        console.log('Filtered Tiers:', tiers); // Debug filtered tiers
         setRanks(tiers);
       })
       .catch((err) => console.error(err));
@@ -42,7 +47,9 @@ export default function RankScreen() {
     <ThemedView style={styles.container}>
       <FlatList
         data={ranks}
-        keyExtractor={(item) => item.uuid}
+        keyExtractor={(item) =>
+          item.tier ? item.tier.toString() : Math.random().toString()
+        }
         numColumns={numColumns}
         contentContainerStyle={styles.listContainer}
         renderItem={({ item }) => (
@@ -50,9 +57,13 @@ export default function RankScreen() {
             entering={FadeIn.duration(500)}
             style={[styles.rankCard, { width: cardWidth }]}
           >
-            <Image source={{ uri: item.displayIcon }} style={styles.rankImage} />
+            {item.largeIcon ? (
+              <Image source={{ uri: item.largeIcon }} style={styles.rankImage} />
+            ) : (
+              <Text style={styles.placeholder}>No Icon</Text>
+            )}
             <ThemedText type="defaultSemiBold" style={styles.rankName}>
-              {item.displayName}
+              {item.tierName || 'Unknown Rank'}
             </ThemedText>
           </Animated.View>
         )}
@@ -91,5 +102,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'center',
     fontSize: 14,
+  },
+  placeholder: {
+    color: '#FFF',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 16,
   },
 });
