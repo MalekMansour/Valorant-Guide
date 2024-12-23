@@ -33,7 +33,6 @@ export default function AgentsScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    // Fetch Agents data from Valorant API
     fetch('https://valorant-api.com/v1/agents')
       .then((res) => res.json())
       .then((data) => setAgents(data.data))
