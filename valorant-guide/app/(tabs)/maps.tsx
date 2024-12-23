@@ -10,11 +10,11 @@ interface Map {
   splash: string;
 }
 
+// Maps: Ascent, Icebox, Pearl
 export default function MapsScreen() {
   const [maps, setMaps] = useState<Map[]>([]); 
 
   useEffect(() => {
-    // Fetch maps from the Valorant API
     fetch('https://valorant-api.com/v1/maps')
       .then((response) => response.json())
       .then((data) => setMaps(data.data))
