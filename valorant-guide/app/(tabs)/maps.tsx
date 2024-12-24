@@ -35,7 +35,7 @@ export default function MapsScreen() {
             <Image source={{ uri: item.splash }} style={styles.image} />
           ) : (
             <View style={styles.placeholder}>
-              <ThemedText type="defaultBold" style={styles.placeholderText}>
+              <ThemedText type="defaultSemiBold" style={styles.placeholderText}>
                 No Image Available
               </ThemedText>
             </View>
